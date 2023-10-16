@@ -1,0 +1,1 @@
+simply run the project using `go run cmd/main.go`
