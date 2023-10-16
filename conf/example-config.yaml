@@ -1,0 +1,12 @@
+google:
+  apiKey: ""
+  searchEngineId: ""
+
+img:
+  width: 100
+  height: 100
+
+postgresSource: "host=127.0.0.1 user=pgsql dbname=google_images sslmode=disable password=1234"
+
+query: "cute kittens."
+count: "50"
