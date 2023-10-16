@@ -10,12 +10,16 @@ import (
 	"github.com/nfnt/resize"
 )
 
+type IResizer interface {
+	ResizeImage(data []byte) ([]byte, error)
+}
+
 type ImageResizer struct {
 	width  uint
 	height uint
 }
 
-func New(width, height uint) ImageResizer {
+func New(width, height uint) IResizer {
 	return ImageResizer{
 		width:  width,
 		height: height,

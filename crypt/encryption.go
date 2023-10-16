@@ -11,6 +11,11 @@ import (
 
 const Key = "aVerySecureKeyyy"
 
+type ICrypt interface {
+	Encrypt(plaintext []byte) ([]byte, error)
+	Decrypt(ciphertext []byte) ([]byte, error)
+}
+
 type ImageCrypt struct {
 	gcm cipher.AEAD
 }

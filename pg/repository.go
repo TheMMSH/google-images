@@ -4,11 +4,16 @@ import (
 	"gorm.io/gorm"
 )
 
+type IRepository interface {
+	StoreImage(data []byte) error
+	FetchImage(id uint) (*ImageModel, error)
+}
+
 type ImageRepository struct {
 	DB *gorm.DB
 }
 
-func NewImageRepository(db *gorm.DB) ImageRepository {
+func New(db *gorm.DB) IRepository {
 	return ImageRepository{DB: db}
 }
 

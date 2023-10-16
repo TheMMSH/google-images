@@ -12,26 +12,30 @@ import (
 
 const GooglePageResultsSize = 10
 
+type IGoogleApiService interface {
+	DownloadImages(query string, page int) ([]MemImage, error)
+}
+
 type GoogleApiService struct {
 	apiKey         string
 	searchEngineID string
 }
 
-func New(apiKey, searchEngineID string) GoogleApiService {
+func New(apiKey, searchEngineID string) IGoogleApiService {
 	return GoogleApiService{
 		apiKey:         apiKey,
 		searchEngineID: searchEngineID,
 	}
 }
 
-func (g GoogleApiService) DownloadImages(query string, page int) ([]memImage, error) {
+func (g GoogleApiService) DownloadImages(query string, page int) ([]MemImage, error) {
 	links, err := g.doSearch(query, page)
 	if err != nil {
 		return nil, err
 	}
 
-	ch := make(chan memImage, len(links))
-	imgs := make([]memImage, 0, 0)
+	ch := make(chan MemImage, len(links))
+	imgs := make([]MemImage, 0, 0)
 
 	var wg sync.WaitGroup
 	for _, link := range links {
@@ -51,7 +55,7 @@ func (g GoogleApiService) DownloadImages(query string, page int) ([]memImage, er
 }
 
 func (g GoogleApiService) doSearch(query string, page int) ([]string, error) {
-	resp, err := http.Get(g.sanitizeQueryUrl(query, page))
+	resp, err := http.Get(sanitizeQueryUrl(query, g.apiKey, g.searchEngineID, page))
 	if err != nil {
 		return nil, err
 	}
@@ -69,20 +73,20 @@ func (g GoogleApiService) doSearch(query string, page int) ([]string, error) {
 	return links, nil
 }
 
-func (g GoogleApiService) sanitizeQueryUrl(query string, page int) string {
+func sanitizeQueryUrl(query, apiKey, searchEngineID string, page int) string {
 	u, _ := url.Parse("https://www.googleapis.com/customsearch/v1")
 	q := u.Query()
 	q.Add("q", url.QueryEscape(query))
 	q.Add("searchType", "image")
-	q.Add("key", g.apiKey)
-	q.Add("cx", g.searchEngineID)
+	q.Add("key", apiKey)
+	q.Add("cx", searchEngineID)
 	q.Add("start", strconv.Itoa(page*GooglePageResultsSize))
 	u.RawQuery = q.Encode()
 
 	return u.String()
 }
 
-func grabImage(url string) memImage {
+func grabImage(url string) MemImage {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("err in grab image function: %v\n", err)

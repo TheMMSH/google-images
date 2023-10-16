@@ -6,4 +6,4 @@ type GoogleResult struct {
 	} `json:"items"`
 }
 
-type memImage []byte
+type MemImage []byte

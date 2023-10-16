@@ -13,9 +13,7 @@ const (
 func TestMakeUrlReplacesQuerySpacesWithPlus(t *testing.T) {
 	asserts := assert.New(t)
 
-	sut := New(apiKey, searchEngineID)
-
-	res := sut.sanitizeQueryUrl("cute kittens are jumping", 0)
+	res := sanitizeQueryUrl("cute kittens are jumping", apiKey, searchEngineID, 0)
 
 	asserts.NotContains(res, "cute kittens are jumping")
 	asserts.Contains(res, "cute")
