@@ -7,7 +7,6 @@ FROM alpine:latest
 
 WORKDIR /root/
 COPY --from=builder /app/main .
-COPY --from=builder /app/conf/config.yaml conf/config.yaml
 
 CMD ["./main"]
 
