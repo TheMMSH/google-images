@@ -21,6 +21,11 @@ func main() {
 	cr := crypt.New()
 	db := pg.New(getGormDb())
 
+	err := db.AutoMigrate()
+	if err != nil {
+		log.Println(err)
+	}
+
 	router := gin.New()
 	controller := server.Server{
 		DownloaderService: service.NewIDownloaderService(
@@ -33,7 +38,10 @@ func main() {
 	}
 
 	controller.SetRoutes(router)
-	router.Run(":" + getEnv("port", "9000"))
+	err = router.Run(":" + getEnv("port", "9000"))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getGoogleApi() googleapis.IGoogleApiService {

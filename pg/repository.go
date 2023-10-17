@@ -7,6 +7,7 @@ import (
 type IRepository interface {
 	SaveImage(data []byte) error
 	GetImage(id uint) (*ImageModel, error)
+	AutoMigrate() error
 }
 
 type ImageRepository struct {
@@ -23,6 +24,10 @@ func (r ImageRepository) SaveImage(data []byte) error {
 
 func (r ImageRepository) GetImage(id uint) (*ImageModel, error) {
 	var img *ImageModel
-	res := r.DB.First(img, id)
+	res := r.DB.Model(ImageModel{}).Where("id = ?", id).First(&img)
 	return img, res.Error
+}
+
+func (r ImageRepository) AutoMigrate() error {
+	return r.DB.AutoMigrate(&ImageModel{})
 }
