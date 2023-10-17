@@ -42,9 +42,10 @@ func (g GoogleApiService) DownloadImages(query string, page int) ([]MemImage, er
 	var wg sync.WaitGroup
 	for _, link := range links {
 		wg.Add(1)
+		lnk := link
 		go func() {
 			defer wg.Done()
-			ch <- grabImage(link)
+			ch <- grabImage(lnk)
 		}()
 	}
 	wg.Wait()
