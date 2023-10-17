@@ -10,6 +10,8 @@ import (
 	"sync"
 )
 
+const concurrentDownloads = 50 // it prevents too much resource consumption at once
+
 type IDownloaderService interface {
 	ProcessImagesConcurrently(query string, maxImages int)
 }
@@ -39,41 +41,47 @@ func (d *ImageDownloaderService) ProcessImagesConcurrently(query string, maxImag
 
 	wg.Add(4)
 
-	// Concurrently Download Images
 	go func() {
 		defer wg.Done()
 		d.downloadImages(query, maxImages, downloadedImagesCh)
 	}()
 
-	// Concurrently Resize Images
 	go func() {
 		defer wg.Done()
 		d.resizeImages(downloadedImagesCh, resizedImagesCh)
 	}()
 
-	// Concurrently Encrypt Images
 	go func() {
 		defer wg.Done()
 		d.encryptImages(resizedImagesCh, encryptedImagesCh)
 	}()
 
-	// Concurrently Store Images to Database
 	go func() {
 		defer wg.Done()
 		d.storeImages(encryptedImagesCh)
 	}()
 
 	wg.Wait()
+	log.Printf("done for query %s\n", query)
 }
 
 func (d *ImageDownloaderService) downloadImages(query string, maxImages int, downloadedImagesCh chan<- []byte) {
 	pages := int(math.Ceil(float64(maxImages) / float64(googleapis.GooglePageResultsSize)))
 	var dlImagesWG sync.WaitGroup
+	sem := make(chan struct{}, concurrentDownloads)
+
 	for i := 0; i < pages; i++ {
 		dlImagesWG.Add(1)
 		p := i
+
+		sem <- struct{}{}
+
 		go func() {
 			defer dlImagesWG.Done()
+			defer func() {
+				<-sem
+			}()
+
 			res, err := d.googleApi.DownloadImages(query, p)
 			if err != nil {
 				log.Println(err)
@@ -84,6 +92,7 @@ func (d *ImageDownloaderService) downloadImages(query string, maxImages int, dow
 			}
 		}()
 	}
+
 	dlImagesWG.Wait()
 	close(downloadedImagesCh)
 }

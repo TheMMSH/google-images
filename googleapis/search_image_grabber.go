@@ -2,6 +2,7 @@ package googleapis
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -59,6 +60,9 @@ func (g GoogleApiService) doSearch(query string, page int) ([]string, error) {
 	resp, err := http.Get(sanitizeQueryUrl(query, g.apiKey, g.searchEngineID, page))
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("cannot search, response status = " + resp.Status)
 	}
 	defer resp.Body.Close()
 

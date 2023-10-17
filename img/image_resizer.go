@@ -2,12 +2,11 @@ package img
 
 import (
 	"bytes"
+	"github.com/nfnt/resize"
 	"image"
 	"image/jpeg"
 	_ "image/jpeg"
 	_ "image/png"
-
-	"github.com/nfnt/resize"
 )
 
 type IResizer interface {
