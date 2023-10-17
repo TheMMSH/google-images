@@ -1,12 +1,14 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/spf13/viper"
 	"google-images/crypt"
 	"google-images/googleapis"
 	"google-images/img"
 	"google-images/pg"
+	"google-images/server"
 	"google-images/service"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -15,14 +17,23 @@ import (
 )
 
 func main() {
-	serv := service.ImageDownloaderService{
-		GoogleApi:    getGoogleApi(),
-		ImageResizer: img.New(viper.GetUint("img.width"), viper.GetUint("img.height")),
-		Cr:           crypt.New(),
-		Repo:         pg.New(getGormDb()),
+	setUpViper()
+	cr := crypt.New()
+	db := pg.New(getGormDb())
+
+	router := gin.New()
+	controller := server.Server{
+		DownloaderService: service.NewIDownloaderService(
+			getGoogleApi(),
+			img.New(viper.GetUint("img.width"), viper.GetUint("img.height")),
+			cr,
+			db,
+		),
+		PresenterService: service.NewIPresenterService(cr, db),
 	}
 
-	serv.ProcessImagesConcurrently(viper.GetString("query"), viper.GetInt("count"))
+	controller.SetRoutes(router)
+	router.Run(":" + getEnv("port", "9000"))
 }
 
 func getGoogleApi() googleapis.IGoogleApiService {

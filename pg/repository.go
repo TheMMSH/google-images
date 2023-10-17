@@ -5,8 +5,8 @@ import (
 )
 
 type IRepository interface {
-	StoreImage(data []byte) error
-	FetchImage(id uint) (*ImageModel, error)
+	SaveImage(data []byte) error
+	GetImage(id uint) (*ImageModel, error)
 }
 
 type ImageRepository struct {
@@ -17,11 +17,11 @@ func New(db *gorm.DB) IRepository {
 	return ImageRepository{DB: db}
 }
 
-func (r ImageRepository) StoreImage(data []byte) error {
+func (r ImageRepository) SaveImage(data []byte) error {
 	return r.DB.Create(&ImageModel{Data: data}).Error
 }
 
-func (r ImageRepository) FetchImage(id uint) (*ImageModel, error) {
+func (r ImageRepository) GetImage(id uint) (*ImageModel, error) {
 	var img *ImageModel
 	res := r.DB.First(img, id)
 	return img, res.Error

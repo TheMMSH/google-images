@@ -10,11 +10,24 @@ import (
 	"sync"
 )
 
+type IDownloaderService interface {
+	ProcessImagesConcurrently(query string, maxImages int)
+}
+
 type ImageDownloaderService struct {
-	GoogleApi    googleapis.IGoogleApiService
-	ImageResizer img.IResizer
-	Cr           crypt.ICrypt
-	Repo         pg.IRepository
+	googleApi    googleapis.IGoogleApiService
+	imageResizer img.IResizer
+	cr           crypt.ICrypt
+	repo         pg.IRepository
+}
+
+func NewIDownloaderService(googleApi googleapis.IGoogleApiService, imageResizer img.IResizer, encryption crypt.ICrypt, repo pg.IRepository) IDownloaderService {
+	return &ImageDownloaderService{
+		googleApi:    googleApi,
+		imageResizer: imageResizer,
+		cr:           encryption,
+		repo:         repo,
+	}
 }
 
 func (d *ImageDownloaderService) ProcessImagesConcurrently(query string, maxImages int) {
@@ -61,7 +74,7 @@ func (d *ImageDownloaderService) downloadImages(query string, maxImages int, dow
 		p := i
 		go func() {
 			defer dlImagesWG.Done()
-			res, err := d.GoogleApi.DownloadImages(query, p)
+			res, err := d.googleApi.DownloadImages(query, p)
 			if err != nil {
 				log.Println(err)
 				return
@@ -77,7 +90,7 @@ func (d *ImageDownloaderService) downloadImages(query string, maxImages int, dow
 
 func (d *ImageDownloaderService) resizeImages(downloadedImagesCh <-chan []byte, resizedImagesCh chan<- []byte) {
 	for image := range downloadedImagesCh {
-		resizedImage, err := d.ImageResizer.ResizeImage(image)
+		resizedImage, err := d.imageResizer.ResizeImage(image)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -89,7 +102,7 @@ func (d *ImageDownloaderService) resizeImages(downloadedImagesCh <-chan []byte, 
 
 func (d *ImageDownloaderService) encryptImages(resizedImagesCh <-chan []byte, encryptedImagesCh chan<- []byte) {
 	for resizedImage := range resizedImagesCh {
-		encryptedImage, err := d.Cr.Encrypt(resizedImage)
+		encryptedImage, err := d.cr.Encrypt(resizedImage)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -101,7 +114,7 @@ func (d *ImageDownloaderService) encryptImages(resizedImagesCh <-chan []byte, en
 
 func (d *ImageDownloaderService) storeImages(encryptedImagesCh <-chan []byte) {
 	for encryptedImage := range encryptedImagesCh {
-		err := d.Repo.StoreImage(encryptedImage)
+		err := d.repo.SaveImage(encryptedImage)
 		if err != nil {
 			log.Println(err)
 			continue
