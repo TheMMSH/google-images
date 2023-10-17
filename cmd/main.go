@@ -66,7 +66,7 @@ func setUpViper() {
 	viper.AddConfigPath("./conf")
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Fatal error config file: %w \n", err)
+		log.Fatalf("Fatal error config file: %v \n", err)
 	}
 }
 
