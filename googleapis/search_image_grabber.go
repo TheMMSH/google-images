@@ -29,7 +29,7 @@ func New(apiKey, searchEngineID string) IGoogleApiService {
 }
 
 func (g GoogleApiService) DownloadImages(query string, page int) ([]MemImage, error) {
-	log.Printf("start downloading image with query %s, %d page \n", query, page)
+	log.Printf("Downloading image with query %s, page %d \n", query, page+1)
 	links, err := g.doSearch(query, page)
 	if err != nil {
 		return nil, err
