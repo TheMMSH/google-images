@@ -12,7 +12,7 @@ And Api Key from [here](https://console.cloud.google.com/apis/credentials)
 
 simply run the project using `go run cmd/main.go` (and address the nags until it doesn't nag no more)
 
-You can also use `docker-compose upd -d`
+You can also use `docker-compose up -d`
 
 ### Endpoints
 
