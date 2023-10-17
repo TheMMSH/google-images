@@ -15,7 +15,7 @@ You can also use `docker-compose up -d`
 
 ### Endpoints
 
-Now if you want to download images use link below:
+Now if you want to store google images in postgres use link below:
 
 GET http://localhost:9000/download/start?query=bad%20kittens&count=10
 
