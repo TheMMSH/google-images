@@ -3,7 +3,7 @@ This project grabs images from google search (primarily kitten images), resizes 
 then Secures them with a very sophisticated key (cuz kitten images are most valuable) and finally stores them in pg
 
 ### Setup project
-Make a `config.yaml` in `conf` folder (or use CONFIG env var to indicate where you config file is)
+Make a `config.yaml` in `conf` folder (or use CONFIG env var to indicate where your config file is)
 you can use example-config as a starting point
 
 grab a google SearchEngineId from google's [Custom Search Engine](https://programmablesearchengine.google.com/controlpanel/all)
