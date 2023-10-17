@@ -7,6 +7,3 @@ img:
   height: 100
 
 postgresSource: "host=127.0.0.1 user=myuser dbname=mydb sslmode=disable password=mypassword"
-
-query: "cute kittens."
-count: "50"
